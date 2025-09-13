@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WonderZoo — Animal Biographies for Kids</title>
+  <style>
+    :root {
+      --bg: #fafafc;
+      --text: #0f172a;
+      --muted: #64748b;
+      --card: #ffffff;
+      --accent: #16a34a;
+      --accent-2: #06b6d4;
+      --chip: #e2e8f0;
+      --ring: rgba(22,163,74,.35);
+    }
+    [data-theme="dark"]{
+      --bg: #0b1220;
+      --text:#e5e7eb;
+      --muted:#94a3b8;
+      --card:#111827;
+      --accent:#22c55e;
+      --accent-2:#22d3ee;
+      --chip:#1f2937;
+      --ring: rgba(34,211,238,.35);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial}
+    header{position:sticky;top:0;z-index:20;background:linear-gradient(180deg,var(--bg),color-mix(in oklab,var(--bg),transparent 10%));backdrop-filter:saturate(1.2) blur(6px);}
+    .wrap{max-width:1080px;margin:auto;padding:16px}
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{font-size:28px}
+    .title{font-weight:800;font-size:22px;letter-spacing:.2px}
+    .subtitle{color:var(--muted);font-size:13px;margin-top:-4px}
+    .toolbar{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px}
+    .search{flex:1;min-width:240px;display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid color-mix(in oklab,var(--text),transparent 90%);padding:10px 12px;border-radius:14px}
+    .search input{all:unset;flex:1}
+    .btn{border:0;border-radius:12px;padding:10px 14px;background:var(--accent);color:#041b0e;font-weight:700;cursor:pointer}
+    .btn.secondary{background:var(--accent-2);color:#05222a}
+    .chips{display:flex;flex-wrap:wrap;gap:8px}
+    .chip{padding:8px 12px;border-radius:999px;background:var(--chip);color:var(--text);font-size:13px;cursor:pointer;border:1px solid color-mix(in oklab,var(--text),transparent 85%)}
+    .chip.active{outline:3px solid var(--ring)}
+    .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:18px}
+    @media (max-width:980px){.grid{grid-template-columns:repeat(3,1fr)}}
+    @media (max-width:720px){.grid{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:480px){.grid{grid-template-columns:1fr}}
+    .card{background:var(--card);border:1px solid color-mix(in oklab,var(--text),transparent 88%);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.06)}
+    .emoji{font-size:42px}
+    .name{font-weight:800;font-size:18px}
+    .meta{color:var(--muted);font-size:12px}
+    .fact{background:color-mix(in oklab,var(--chip),transparent 35%);padding:10px;border-radius:12px}
+    .card .row{display:flex;align-items:center;gap:10px;justify-content:space-between}
+    .small{font-size:12px;color:var(--muted)}
+    .link{padding:8px 12px;border-radius:10px;background:var(--chip);cursor:pointer}
+    footer{padding:40px 16px;color:var(--muted);text-align:center}
+
+    /* Modal */
+    dialog{width:min(820px,92vw);border:1px solid color-mix(in oklab,var(--text),transparent 80%);border-radius:18px;background:var(--card);color:var(--text);padding:0;box-shadow:0 24px 60px rgba(0,0,0,.35)}
+    dialog::backdrop{background:rgba(0,0,0,.45)}
+    .modal-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid color-mix(in oklab,var(--text),transparent 88%)}
+    .modal-body{display:grid;grid-template-columns:220px 1fr;gap:16px;padding:16px}
+    @media (max-width:720px){.modal-body{grid-template-columns:1fr}}
+    .modal-actions{display:flex;gap:10px;flex-wrap:wrap}
+    .badge{display:inline-flex;gap:6px;align-items:center;background:var(--chip);border-radius:999px;padding:4px 10px;font-size:12px}
+    .tts{background:transparent;border:1px dashed color-mix(in oklab,var(--text),transparent 75%);color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+    .close{background:#ef4444;color:white;border:0;padding:8px 12px;border-radius:10px;cursor:pointer}
+
+    /* Quiz */
+    .quiz{margin-top:28px;border-top:1px dashed color-mix(in oklab,var(--text),transparent 80%);padding-top:16px}
+    .q{font-weight:700;margin-bottom:8px}
+    .opt{display:block;margin:6px 0;padding:8px 10px;border-radius:10px;border:1px solid color-mix(in oklab,var(--text),transparent 85%);cursor:pointer}
+    .opt.correct{background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.5)}
+    .opt.wrong{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.5)}
+
+    .toggle{background:var(--chip);border-radius:999px;padding:4px;display:inline-flex;gap:6px}
+    .toggle button{background:var(--card);border:1px solid color-mix(in oklab,var(--text),transparent 85%);border-radius:999px;padding:6px 10px;cursor:pointer}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <div class="brand">
+        <div class="logo">🦁🐧🐢</div>
+        <div>
+          <div class="title">WonderZoo</div>
+          <div class="subtitle">Fun animal biographies for curious kids</div>
+        </div>
+      </div>
+      <div class="toolbar" role="region" aria-label="Controls">
+        <label class="search" aria-label="Search animals">
+          <span>🔎</span>
+          <input id="search" placeholder="Search animals (e.g., Lion, Ocean, Herbivore)…" />
+        </label>
+        <div class="toggle" aria-label="Theme switcher">
+          <button id="lightBtn" title="Light mode">🌞</button>
+          <button id="darkBtn" title="Dark mode">🌙</button>
+        </div>
+        <button id="shuffle" class="btn secondary" title="Pick a random animal">Surprise Me ✨</button>
+      </div>
+      <div class="chips" id="chips" aria-label="Filter by habitat"></div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section id="grid" class="grid" aria-live="polite"></section>
+  </main>
+
+  <footer>
+    Made with ❤️ for kids. Tip: Click an animal to read its story aloud!
+  </footer>
+
+  <dialog id="modal" aria-labelledby="modalTitle">
+    <div class="modal-head">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div id="modalEmoji" style="font-size:36px"></div>
+        <div>
+          <div id="modalTitle" class="name"></div>
+          <div id="modalMeta" class="small"></div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="tts" id="readBtn">🔈 Read Aloud</button>
+        <button class="close" id="closeBtn">Close</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div>
+        <div id="modalBadges" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px"></div>
+        <div class="fact" id="modalSummary"></div>
+      </div>
+      <div>
+        <div class="fact"><strong>Fun Facts</strong>
+          <ul id="factsList" style="margin:8px 0 0 18px"></ul>
+        </div>
+        <div class="quiz" id="quizBox" hidden>
+          <div class="q" id="quizQ"></div>
+          <div id="quizOpts"></div>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <script>
+    const animals = [
+      {
+        id: 'lion', name: 'Lion', emoji: '🦁', habitat: 'Savanna', diet: 'Carnivore', size: 'Large',
+        summary: 'Lions are powerful cats that live in family groups called prides. They rest in the shade by day and roar to talk across long distances at night.',
+        facts: [
+          'A lion\'s roar can be heard up to 8 km away.',
+          'Female lions (lionesses) do most of the hunting together.',
+          'Lions can sleep for 16–20 hours a day!',
+        ]
+      },
+      {
+        id: 'elephant', name: 'Elephant', emoji: '🐘', habitat: 'Grassland', diet: 'Herbivore', size: 'Giant',
+        summary: 'Elephants are the largest land animals. They use their trunks to drink, smell, grab food, and even give hugs!',
+        facts: [
+          'Their ears help them keep cool like built-in fans.',
+          'Elephants remember water holes for many years.',
+          'They talk using sounds too low for humans to hear (infrasound).'
+        ]
+      },
+      {
+        id: 'tiger', name: 'Tiger', emoji: '🐯', habitat: 'Forest', diet: 'Carnivore', size: 'Large',
+        summary: 'Tigers are stealthy hunters with striped fur that helps them hide among tall grasses and trees.',
+        facts: [
+          'Every tiger has unique stripes like fingerprints.',
+          'They are strong swimmers and enjoy water.',
+          'A tiger can leap over 6 meters in a single bound.'
+        ]
+      },
+      {
+        id: 'giraffe', name: 'Giraffe', emoji: '🦒', habitat: 'Savanna', diet: 'Herbivore', size: 'Tall',
+        summary: 'Giraffes are the tallest animals, using long necks to nibble tasty leaves from acacia trees.',
+        facts: [
+          'A giraffe\'s tongue can be about 45–50 cm long.',
+          'They only sleep a few minutes at a time.',
+          'Their spots help with camouflage and body cooling.'
+        ]
+      },
+      {
+        id: 'penguin', name: 'Penguin', emoji: '🐧', habitat: 'Polar', diet: 'Carnivore', size: 'Medium',
+        summary: 'Penguins are birds that cannot fly, but they zoom through the water like rockets to catch fish.',
+        facts: [
+          'They huddle together to stay warm in the cold.',
+          'Gentoo penguins can swim over 35 km/h.',
+          'Dads in some species keep the egg warm on their feet.'
+        ]
+      },
+      {
+        id: 'dolphin', name: 'Dolphin', emoji: '🐬', habitat: 'Ocean', diet: 'Carnivore', size: 'Medium',
+        summary: 'Dolphins are clever ocean mammals that use clicks and whistles to chat and find food.',
+        facts: [
+          'They sleep with one half of the brain at a time.',
+          'Dolphins use echolocation to “see” with sound.',
+          'They often surf waves just for fun!'
+        ]
+      },
+      {
+        id: 'panda', name: 'Giant Panda', emoji: '🐼', habitat: 'Forest', diet: 'Herbivore', size: 'Medium',
+        summary: 'Pandas spend most of the day munching bamboo and the rest rolling around being adorable.',
+        facts: [
+          'They can eat 12–38 kg of bamboo daily.',
+          'A panda\'s “thumb” is actually a wrist bone.',
+          'Newborn pandas are tiny—about the size of a stick of butter!'
+        ]
+      },
+      {
+        id: 'kangaroo', name: 'Kangaroo', emoji: '🦘', habitat: 'Grassland', diet: 'Herbivore', size: 'Medium',
+        summary: 'Kangaroos hop on powerful legs and carry their joeys in a cozy tummy pouch.',
+        facts: [
+          'They can hop at speeds over 40 km/h.',
+          'Kangaroos can\'t walk backward easily.',
+          'They balance with their strong tails while jumping.'
+        ]
+      },
+      {
+        id: 'owl', name: 'Owl', emoji: '🦉', habitat: 'Forest', diet: 'Carnivore', size: 'Small',
+        summary: 'Owls are nighttime hunters with super hearing and big eyes that see well in the dark.',
+        facts: [
+          'An owl can rotate its head up to 270°.',
+          'Their feathers are shaped for silent flight.',
+          'Some owls live in deserts and even cities.'
+        ]
+      },
+      {
+        id: 'turtle', name: 'Sea Turtle', emoji: '🐢', habitat: 'Ocean', diet: 'Omnivore', size: 'Medium',
+        summary: 'Sea turtles glide through oceans and remember beaches where they were born to lay eggs as adults.',
+        facts: [
+          'Some species migrate thousands of kilometers.',
+          'Their shells are part of their skeleton.',
+          'Hatchlings use moonlight to find the sea.'
+        ]
+      }
+    ];
+
+    const habitats = ['All','Forest','Savanna','Grassland','Ocean','Polar'];
+
+    const el = {
+      grid: document.getElementById('grid'),
+      search: document.getElementById('search'),
+      chips: document.getElementById('chips'),
+      shuffle: document.getElementById('shuffle'),
+      modal: document.getElementById('modal'),
+      modalEmoji: document.getElementById('modalEmoji'),
+      modalTitle: document.getElementById('modalTitle'),
+      modalMeta: document.getElementById('modalMeta'),
+      modalBadges: document.getElementById('modalBadges'),
+      modalSummary: document.getElementById('modalSummary'),
+      factsList: document.getElementById('factsList'),
+      quizBox: document.getElementById('quizBox'),
+      quizQ: document.getElementById('quizQ'),
+      quizOpts: document.getElementById('quizOpts'),
+      readBtn: document.getElementById('readBtn'),
+      closeBtn: document.getElementById('closeBtn'),
+      lightBtn: document.getElementById('lightBtn'),
+      darkBtn: document.getElementById('darkBtn'),
+    };
+
+    let state = { habitat: 'All', q: '' };
+
+    function renderChips(){
+      el.chips.innerHTML = '';
+      habitats.forEach(h => {
+        const c = document.createElement('button');
+        c.className = 'chip' + (state.habitat===h?' active':'');
+        c.textContent = h;
+        c.onclick = ()=>{ state.habitat = h; renderGrid(); highlightChips(); };
+        el.chips.appendChild(c);
+      });
+    }
+    function highlightChips(){
+      [...el.chips.children].forEach(btn => {
+        btn.classList.toggle('active', btn.textContent===state.habitat);
+      });
+    }
+
+    function matchFilter(a){
+      const fitsHab = state.habitat==='All' || a.habitat===state.habitat;
+      const q = state.q.trim().toLowerCase();
+      if(!q) return fitsHab;
+      const hay = [a.name,a.habitat,a.diet,a.size,...a.facts].join(' ').toLowerCase();
+      return fitsHab && hay.includes(q);
+    }
+
+    function cardTemplate(a){
+      const div = document.createElement('article');
+      div.className = 'card';
+      div.tabIndex = 0;
+      div.setAttribute('role','button');
+      div.setAttribute('aria-label', `${a.name} details`);
+      div.innerHTML = `
+        <div class="row"><div class="emoji">${a.emoji}</div><span class="link">Read ▶</span></div>
+        <div class="name">${a.name}</div>
+        <div class="meta">Habitat: ${a.habitat} • Diet: ${a.diet} • Size: ${a.size}</div>
+        <div class="fact">${a.summary}</div>
+      `;
+      div.onclick = ()=> openModal(a.id);
+      div.onkeyup = (e)=>{ if(e.key==='Enter' || e.key===' ') openModal(a.id) };
+      return div;
+    }
+
+    function renderGrid(){
+      const list = animals.filter(matchFilter);
+      el.grid.innerHTML = '';
+      if(list.length===0){
+        const p = document.createElement('p');
+        p.className = 'small';
+        p.textContent = 'No animals match your search. Try another word or clear filters.';
+        el.grid.appendChild(p);
+        return;
+      }
+      list.forEach(a => el.grid.appendChild(cardTemplate(a)));
+    }
+
+    function openModal(id){
+      const a = animals.find(x => x.id===id);
+      if(!a) return;
+      el.modalEmoji.textContent = a.emoji;
+      el.modalTitle.textContent = a.name;
+      el.modalMeta.textContent = `${a.habitat} • ${a.diet} • ${a.size}`;
+      el.modalBadges.innerHTML = '';
+      [ ['Habitat',a.habitat], ['Diet',a.diet], ['Size',a.size] ].forEach(([k,v])=>{
+        const b = document.createElement('span'); b.className='badge'; b.textContent = `${k}: ${v}`; el.modalBadges.appendChild(b);
+      });
+      el.modalSummary.textContent = a.summary;
+      el.factsList.innerHTML = '';
+      a.facts.forEach(f=>{ const li=document.createElement('li'); li.textContent=f; el.factsList.appendChild(li); });
+      buildQuiz(a);
+      el.modal.showModal();
+      el.readBtn.onclick = ()=> speak(`${a.name}. ${a.summary} Fun facts: ${a.facts.join('. ')}`);
+    }
+
+    function closeModal(){ el.modal.close(); stopSpeak(); }
+
+    function buildQuiz(a){
+      // Simple quiz: ask which habitat/diet/size is correct
+      const fields = [ ['habitat','Habitat'], ['diet','Diet'], ['size','Size'] ];
+      const pick = fields[Math.floor(Math.random()*fields.length)];
+      const key = pick[0], label = pick[1];
+      const correct = a[key];
+      const pool = [...new Set(animals.map(x=>x[key]).filter(v=>v!==correct))];
+      const distractors = shuffle(pool).slice(0,3);
+      const options = shuffle([correct, ...distractors]);
+      el.quizBox.hidden = false;
+      el.quizQ.textContent = `What is the ${label.toLowerCase()} of the ${a.name}?`;
+      el.quizOpts.innerHTML = '';
+      options.forEach(opt=>{
+        const b = document.createElement('button');
+        b.className = 'opt'; b.textContent = opt;
+        b.onclick = ()=>{
+          [...el.quizOpts.children].forEach(x=> x.disabled = true);
+          if(opt===correct){ b.classList.add('correct'); }
+          else { b.classList.add('wrong'); [...el.quizOpts.children].forEach(x=>{ if(x.textContent===correct) x.classList.add('correct'); }); }
+        };
+        el.quizOpts.appendChild(b);
+      });
+    }
+
+    function shuffle(arr){ return arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]); }
+
+    function speak(text){
+      if(!('speechSynthesis' in window)) { alert('Speech not supported on this browser.'); return; }
+      stopSpeak();
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = 1; u.pitch = 1; u.lang = 'en-US';
+      speechSynthesis.speak(u);
+    }
+    function stopSpeak(){ if('speechSynthesis' in window) speechSynthesis.cancel(); }
+
+    // Theme
+    const root = document.documentElement;
+    const saved = localStorage.getItem('wz-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    setTheme(saved);
+    function setTheme(t){ root.setAttribute('data-theme', t==='dark' ? 'dark' : 'light'); localStorage.setItem('wz-theme', t); }
+    el.lightBtn.onclick = ()=> setTheme('light');
+    el.darkBtn.onclick = ()=> setTheme('dark');
+
+    // Search & filters
+    el.search.addEventListener('input', (e)=>{ state.q = e.target.value; renderGrid(); });
+    el.shuffle.onclick = ()=>{ const pick = animals[Math.floor(Math.random()*animals.length)]; openModal(pick.id); };
+    el.closeBtn.onclick = closeModal;
+
+    // Init
+    renderChips();
+    renderGrid();
+  </script>
+</body>
+</html>
